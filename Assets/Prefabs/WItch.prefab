@@ -154,7 +154,7 @@ GameObject:
   - component: {fileID: 2868091426565527572}
   - component: {fileID: 3274645841932729941}
   m_Layer: 0
-  m_Name: Player
+  m_Name: WItch
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -307,7 +307,7 @@ MeshRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 2100000, guid: 29f636d338809ff4cae68e6c223c2ae6, type: 2}
+  - {fileID: 2100000, guid: aa11199f697d347639d9b31756917f3e, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0

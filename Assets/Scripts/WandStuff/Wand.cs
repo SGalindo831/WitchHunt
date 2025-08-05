@@ -8,13 +8,16 @@ public class InteractableWand : MonoBehaviour, IInteractable
     
     [Header("Visual Effects")]
     [SerializeField] private Color highlightColor = Color.yellow;
-    private Color originalColor; // Store the original color instead of assuming white
+    private Color originalColor;
     
     private Renderer wandRenderer;
     private Rigidbody wandRigidbody;
     private Collider wandCollider;
     private Transform originalParent;
     private bool isHighlighted = false;
+
+    //Here we are referencing the pointing system
+    private PointingSystem pointingSystem;
 
     private void Start()
     {
@@ -23,7 +26,7 @@ public class InteractableWand : MonoBehaviour, IInteractable
         wandRigidbody = GetComponent<Rigidbody>();
         wandCollider = GetComponent<Collider>();
         originalParent = transform.parent;
-        
+
         // Store the original color of the wand
         if (wandRenderer != null && wandRenderer.material != null)
         {
@@ -34,18 +37,18 @@ public class InteractableWand : MonoBehaviour, IInteractable
         {
             originalColor = Color.white; // Fallback
         }
-        
+
         // Make sure the wand has required components
         if (wandRenderer == null)
         {
             Debug.LogError($"Wand {wandName} needs a Renderer component!");
         }
-        
+
         if (wandRigidbody == null)
         {
             wandRigidbody = gameObject.AddComponent<Rigidbody>();
         }
-        
+
         if (wandCollider == null)
         {
             Debug.LogError($"Wand {wandName} needs a Collider component!");
@@ -103,9 +106,19 @@ public class InteractableWand : MonoBehaviour, IInteractable
         }
     }
 
-    private void PickUpWand(Transform player)
+     private void PickUpWand(Transform player)
     {
         Debug.Log($"Picked up {wandName}!");
+        
+        // Find pointing system on the player
+        pointingSystem = player.GetComponent<PointingSystem>();
+        
+        // If player has hand out, put it away automatically
+        if (pointingSystem != null && pointingSystem.IsHandOut())
+        {
+            Debug.Log("Automatically putting hand away because wand was picked up");
+            pointingSystem.PutHandAway();
+        }
         
         isPickedUp = true;
         SetHighlight(false);
@@ -144,6 +157,12 @@ public class InteractableWand : MonoBehaviour, IInteractable
             transform.localRotation = Quaternion.Euler(-90f, 0f, 0f); // Points straight forward
             
             Debug.Log("No hand found, attached to player directly");
+        }
+        
+        // Notify pointing system that wand was picked up
+        if (pointingSystem != null)
+        {
+            pointingSystem.OnWandPickedUp();
         }
     }
 
@@ -208,6 +227,9 @@ public class InteractableWand : MonoBehaviour, IInteractable
         Debug.Log($"Wand final position: {transform.position}");
         Debug.Log($"Wand active: {gameObject.activeInHierarchy}");
         Debug.Log($"Wand renderer enabled: {wandRenderer != null && wandRenderer.enabled}");
+        
+        // Clear pointing system reference
+        pointingSystem = null;
     }
     
     // Public method to drop the wand (called by InteractionManager)

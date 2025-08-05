@@ -14,6 +14,9 @@ public class InteractionManager : MonoBehaviour
     
     private IInteractable currentInteractable;
     private IInteractable lastInteractable;
+    
+    // Reference to pointing system for coordination
+    private PointingSystem pointingSystem;
 
     private void Start()
     {
@@ -28,6 +31,9 @@ public class InteractionManager : MonoBehaviour
         {
             crosshairUI = FindFirstObjectByType<CrosshairUI>();
         }
+        
+        // Find pointing system
+        pointingSystem = GetComponent<PointingSystem>();
     }
 
     private void Update()
@@ -97,12 +103,36 @@ public class InteractionManager : MonoBehaviour
         // Find any held interactable objects and drop them
         InteractableWand[] heldWands = GetComponentsInChildren<InteractableWand>();
         
+        bool droppedSomething = false;
+        
         foreach (InteractableWand wand in heldWands)
         {
             if (wand.IsPickedUp())
             {
-                wand.DropWand(); // We'll need to make this method public
+                wand.DropWand();
+                droppedSomething = true;
                 break; // Only drop one item at a time
+            }
+        }
+        
+        // If we didn't drop anything and player is trying to drop, maybe they want to point?
+        if (!droppedSomething && pointingSystem != null && !pointingSystem.IsHandOut())
+        {
+            // Check if there are any wands to drop first
+            bool hasWandEquipped = false;
+            foreach (InteractableWand wand in heldWands)
+            {
+                if (wand.IsPickedUp())
+                {
+                    hasWandEquipped = true;
+                    break;
+                }
+            }
+            
+            // If no wand equipped and trying to "drop", maybe they want to point?
+            if (!hasWandEquipped)
+            {
+                Debug.Log("No wand to drop, did you mean to point? Use H key to take hand out.");
             }
         }
     }

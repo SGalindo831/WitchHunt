@@ -1,3 +1,4 @@
+using Unity.VisualScripting;
 using UnityEngine;
 
 public class PointingSystem : MonoBehaviour
@@ -28,6 +29,9 @@ public class PointingSystem : MonoBehaviour
     // Pointing target
     private Transform currentTarget;
 
+    // Wand System integration
+    private InteractableWand equippedWand;
+
     private void Start()
     {
         // Find camera if not assigned
@@ -35,28 +39,29 @@ public class PointingSystem : MonoBehaviour
         {
             playerCamera = Camera.main;
         }
-        
+
         // Find crosshair UI if not assigned
         if (crosshairUI == null)
         {
             crosshairUI = FindFirstObjectByType<CrosshairUI>();
         }
-        
+
         // Find hand attach point if not assigned (look for HandPosition like your wand system)
         if (handAttachPoint == null)
         {
             handAttachPoint = FindHandAttachPoint();
         }
-        
+
         // Set up hand GameObject
         SetupHandGameObject();
-        
+
         // Start with hand put away
         PutHandAway();
     }
 
     private void Update()
     {
+        UpdateEquippedWandReference(); // Make sure to call this method!
         HandleInput();
         
         if (isHandOut)
@@ -64,6 +69,52 @@ public class PointingSystem : MonoBehaviour
             UpdatePointing();
         }
     }
+
+    private void UpdateEquippedWandReference()
+    {
+        // Fixed: Get array of wands, then iterate through them
+        InteractableWand[] wands = GetComponentsInChildren<InteractableWand>();
+        equippedWand = null;
+
+        foreach (InteractableWand wand in wands)
+        {
+            if (wand.IsPickedUp())
+            {
+                equippedWand = wand;
+                break;
+            }
+        }
+    }
+
+    private void AttemptToTakeHandOut()
+    {
+        //We check if we have the wand equipped
+        if (HasWandEquipped())
+        {
+            Debug.Log("Cannot point while holding wand. Drop wand first!");
+            return;
+        }
+        
+        // If no wand equipped, take hand out
+        TakeHandOut();
+    }
+
+    private void ForceDropWandAndPoint()
+    {
+        //This will be called when the player wants to force point and drop the wand
+        if (HasWandEquipped())
+        {
+            Debug.Log("Dropping wand to point");
+            equippedWand.DropWand();
+            //Adding small delay so hand wont instantly clip into wand
+            Invoke(nameof(TakeHandOut), 0.1f);
+        }
+        else
+        {
+            TakeHandOut();
+        }
+    }
+    
 
     private void HandleInput()
     {
@@ -76,10 +127,10 @@ public class PointingSystem : MonoBehaviour
             }
             else
             {
-                TakeHandOut();
+                AttemptToTakeHandOut(); // Changed this to call the attempt method
             }
         }
-        
+
         // Point at target (only if hand is out)
         if (Input.GetKeyDown(pointKey) && isHandOut)
         {
@@ -187,6 +238,13 @@ public class PointingSystem : MonoBehaviour
 
     public void TakeHandOut()
     {
+        // Double check that we don't have a wand equipped
+        if (HasWandEquipped())
+        {
+            Debug.Log("Cannot take hand out while wand is equipped!");
+            return;
+        }
+        
         if (isHandOut) return;
         
         Debug.Log("Taking hand out");
@@ -197,7 +255,7 @@ public class PointingSystem : MonoBehaviour
             handGameObject.SetActive(true);
         }
     }
-
+    
     public void PutHandAway()
     {
         Debug.Log("Putting hand away");
@@ -212,6 +270,16 @@ public class PointingSystem : MonoBehaviour
         
         SetCrosshairHighlight(false);
     }
+    
+    // Method to automatically put hand away when picking up wand
+    public void OnWandPickedUp()
+    {
+        if (isHandOut)
+        {
+            Debug.Log("Automatically putting hand away because wand was picked up");
+            PutHandAway();
+        }
+    }
 
     private void SetupHandGameObject()
     {
@@ -220,7 +288,7 @@ public class PointingSystem : MonoBehaviour
             Debug.LogWarning("Hand GameObject not assigned in PointingSystem!");
             return;
         }
-        
+
         // Attach hand to the player if it's not already
         if (handAttachPoint != null)
         {
@@ -231,18 +299,18 @@ public class PointingSystem : MonoBehaviour
             // Fallback: attach to player directly
             handGameObject.transform.SetParent(transform);
         }
-        
+
         // Find arm and finger transforms if not assigned
         if (armTransform == null)
         {
             armTransform = handGameObject.transform.Find("Arm");
         }
-        
+
         if (fingerTransform == null)
         {
             fingerTransform = handGameObject.transform.Find("Finger");
         }
-        
+
         // Log what we found
         Debug.Log($"Hand setup complete. Arm: {(armTransform != null ? "Found" : "Not found")}, Finger: {(fingerTransform != null ? "Found" : "Not found")}");
     }
@@ -293,9 +361,14 @@ public class PointingSystem : MonoBehaviour
         }
     }
 
+    private bool HasWandEquipped()
+    {
+        return equippedWand != null && equippedWand.IsPickedUp();
+    }
+
     // Public methods for external systems
     public bool IsHandOut() => isHandOut;
     public bool IsPointing() => isPointing;
     public Transform GetCurrentTarget() => currentTarget;
-    public bool CanPoint() => isHandOut && currentTarget != null;
+    public bool CanPoint() => isHandOut && currentTarget != null && !HasWandEquipped();
 }

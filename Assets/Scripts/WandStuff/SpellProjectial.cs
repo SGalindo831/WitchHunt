@@ -1,4 +1,3 @@
-// SpellProjectile.cs - Updated version with frog transformation
 using UnityEngine;
 
 public class SpellProjectile : MonoBehaviour

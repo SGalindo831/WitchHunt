@@ -80,7 +80,6 @@ public class InteractableWand : MonoBehaviour, IInteractable
         {
             PickUpWand(player);
         }
-        // Remove the else clause - dropping is now handled by G key
     }
 
     // Interface method - returns interaction prompt
@@ -89,7 +88,7 @@ public class InteractableWand : MonoBehaviour, IInteractable
         return isPickedUp ? "" : $"Pick up {wandName}"; // No prompt when picked up
     }
 
-    // Interface method - checks if this object can be interacted with
+    // Interface method- checks if this object can be interacted with
     public bool CanInteract()
     {
         return true; // Wand can always be interacted with
@@ -135,7 +134,7 @@ public class InteractableWand : MonoBehaviour, IInteractable
             wandCollider.enabled = false;
         }
         
-        // Attach to player's hand (you can create a hand transform later)
+        // Attach to player's hand
         Transform playerHand = FindPlayerHand(player);
         if (playerHand != null)
         {
@@ -246,7 +245,7 @@ public class InteractableWand : MonoBehaviour, IInteractable
         Debug.Log($"Looking for hand on player: {player.name}");
         
         // Look for hand transforms in the player hierarchy
-        Transform hand = player.Find("HandPosition");  // Added this one first!
+        Transform hand = player.Find("HandPosition");
         if (hand != null) 
         {
             Debug.Log("Found HandPosition!");

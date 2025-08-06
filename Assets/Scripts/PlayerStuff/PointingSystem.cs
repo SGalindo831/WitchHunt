@@ -61,7 +61,7 @@ public class PointingSystem : MonoBehaviour
 
     private void Update()
     {
-        UpdateEquippedWandReference(); // Make sure to call this method!
+        UpdateEquippedWandReference();
         HandleInput();
         
         if (isHandOut)
@@ -72,7 +72,6 @@ public class PointingSystem : MonoBehaviour
 
     private void UpdateEquippedWandReference()
     {
-        // Fixed: Get array of wands, then iterate through them
         InteractableWand[] wands = GetComponentsInChildren<InteractableWand>();
         equippedWand = null;
 
@@ -127,7 +126,7 @@ public class PointingSystem : MonoBehaviour
             }
             else
             {
-                AttemptToTakeHandOut(); // Changed this to call the attempt method
+                AttemptToTakeHandOut();
             }
         }
 
@@ -149,7 +148,7 @@ public class PointingSystem : MonoBehaviour
         // Check if ray hits a player
         if (Physics.Raycast(ray, out hit, pointingRange, playerLayerMask))
         {
-            // Check if hit object is a player (you might want to adjust this based on your player tags)
+            // Check if hit object is a player
             if (hit.collider.CompareTag("Player") || hit.collider.CompareTag("Human"))
             {
                 // Make sure we're not pointing at ourselves
@@ -178,7 +177,7 @@ public class PointingSystem : MonoBehaviour
             Vector3 direction = (currentTarget.position - handGameObject.transform.position).normalized;
             Quaternion targetRotation = Quaternion.LookRotation(direction);
             
-            // Apply rotation to the arm (you might need to adjust the axis based on your model)
+            // Apply rotation to the arm
             if (armTransform != null)
             {
                 armTransform.rotation = Quaternion.Slerp(armTransform.rotation, targetRotation, Time.deltaTime * pointingSpeed);
@@ -209,7 +208,6 @@ public class PointingSystem : MonoBehaviour
             // Found a target to point at!
             Debug.Log($"Pointing at: {currentTarget.name}");
             
-            // Here you can add the "Witch!" callout functionality
             CallOutWitch(currentTarget);
         }
         else
@@ -222,16 +220,15 @@ public class PointingSystem : MonoBehaviour
     {
         Debug.Log($"WITCH! Accusing {target.name}!");
         
-        // TODO: Add your trial scene transition here
+        // TODO: Add trial scene transition here
         // For now, just show a message
         
-        // You might want to:
+        // TODO:
         // 1. Freeze all players
         // 2. Show accusation UI
         // 3. Transition to trial scene
         // 4. Pass the accused player data to the trial system
         
-        // Example of what you might do:
         // TrialManager.Instance.StartTrial(transform, target);
         // SceneManager.LoadScene("TrialScene");
     }
@@ -317,7 +314,7 @@ public class PointingSystem : MonoBehaviour
 
     private Transform FindHandAttachPoint()
     {
-        // Look for hand attachment points (similar to your wand system)
+        // Look for hand attachment points
         Transform handPoint = transform.Find("RightHandPosition");
         if (handPoint != null) return handPoint;
         

@@ -91,8 +91,8 @@ public class CrosshairUI : MonoBehaviour
             }
         }
 
-        // Create center dot (optional)
-        pixels[center * size + center] = Color.clear; // Remove center pixel for hollow crosshair
+        // Create center dot
+        pixels[center * size + center] = Color.clear;
 
         texture.SetPixels(pixels);
         texture.Apply();

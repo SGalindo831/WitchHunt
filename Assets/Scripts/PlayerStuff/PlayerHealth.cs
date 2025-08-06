@@ -1,4 +1,3 @@
-// PlayerHealth.cs - Add this to all players
 using UnityEngine;
 using System.Collections;
 
@@ -9,7 +8,7 @@ public class PlayerHealth : MonoBehaviour
     public bool isFrog = false;
     
     [Header("Frog Transformation")]
-    [SerializeField] private GameObject frogModel; // Assign frog prefab/model
+    [SerializeField] private GameObject frogModel; // Assign frog
     [SerializeField] private GameObject humanModel; // Assign human model
     [SerializeField] private float frogDuration = 15f; // How long they stay a frog
     
@@ -52,7 +51,6 @@ public class PlayerHealth : MonoBehaviour
         // Reduce movement speed
         if (playerController != null)
         {
-            // You'll need to make walkSpeed public in PlayerController or add a setter method
             // playerController.walkSpeed = frogMoveSpeed;
         }
         
@@ -105,7 +103,7 @@ public class PlayerHealth : MonoBehaviour
     public bool IsHuman() => isHuman;
     public bool IsFrog() => isFrog;
     
-    // Method to instantly cure frog transformation (for power-ups, etc.)
+    // Method to turn back into human (maybe will be used)
     public void CureFrogTransformation()
     {
         if (frogTransformCoroutine != null)
